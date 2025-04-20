@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Audio Generation</title>
+</head>
+<body>
+  <h1>Audio Generator for Cooking Timer</h1>
+  <p>This page generates the sounds needed for the cooking timer using the Web Audio API.</p>
+  
+  <button id="generateTimerEnd">Generate Timer End Sound</button>
+  <button id="generateTimerTick">Generate Timer Tick Sound</button>
+  <button id="generateButtonClick">Generate Button Click Sound</button>
+  
+  <script>
+    // Timer End Sound - Melodic bell sound
+    function generateTimerEndSound() {
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      
+      // Create oscillator for the main note
+      const oscillator1 = audioContext.createOscillator();
+      oscillator1.type = 'sine';
+      oscillator1.frequency.setValueAtTime(523.25, audioContext.currentTime); // C5
+      
+      // Create oscillator for the harmony note
+      const oscillator2 = audioContext.createOscillator();
+      oscillator2.type = 'sine';
+      oscillator2.frequency.setValueAtTime(659.25, audioContext.currentTime); // E5
+      
+      // Create gain nodes for envelopes
+      const gainNode1 = audioContext.createGain();
+      const gainNode2 = audioContext.createGain();
+      
+      // Set initial gain to 0
+      gainNode1.gain.setValueAtTime(0, audioContext.currentTime);
+      gainNode2.gain.setValueAtTime(0, audioContext.currentTime);
+      
+      // Connect nodes
+      oscillator1.connect(gainNode1);
+      oscillator2.connect(gainNode2);
+      gainNode1.connect(audioContext.destination);
+      gainNode2.connect(audioContext.destination);
+      
+      // Start oscillators
+      oscillator1.start(audioContext.currentTime);
+      oscillator2.start(audioContext.currentTime);
+      
+      // Envelope for first note
+      gainNode1.gain.setValueAtTime(0, audioContext.currentTime);
+      gainNode1.gain.linearRampToValueAtTime(0.5, audioContext.currentTime + 0.1);
+      gainNode1.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 2);
+      
+      // Envelope for second note (delayed start)
+      gainNode2.gain.setValueAtTime(0, audioContext.currentTime);
+      gainNode2.gain.linearRampToValueAtTime(0.4, audioContext.currentTime + 0.3);
+      gainNode2.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 2.5);
+      
+      // Stop oscillators
+      oscillator1.stop(audioContext.currentTime + 3);
+      oscillator2.stop(audioContext.currentTime + 3);
+      
+      // Record the audio
+      const dest = audioContext.createMediaStreamDestination();
+      gainNode1.connect(dest);
+      gainNode2.connect(dest);
+      
+      const mediaRecorder = new MediaRecorder(dest.stream);
+      const chunks = [];
+      
+      mediaRecorder.ondataavailable = (e) => {
+        chunks.push(e.data);
+      };
+      
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(chunks, { type: 'audio/mpeg' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        document.body.appendChild(a);
+        a.style = 'display: none';
+        a.href = url;
+        a.download = 'timer-end.mp3';
+        a.click();
+        window.URL.revokeObjectURL(url);
+      };
+      
+      mediaRecorder.start();
+      setTimeout(() => {
+        mediaRecorder.stop();
+      }, 3000);
+    }
+    
+    // Timer Tick Sound - Short click
+    function generateTimerTickSound() {
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      
+      // Create oscillator
+      const oscillator = audioContext.createOscillator();
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(1200, audioContext.currentTime);
+      
+      // Create gain node
+      const gainNode = audioContext.createGain();
+      gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+      
+      // Connect nodes
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      // Start oscillator
+      oscillator.start(audioContext.currentTime);
+      
+      // Envelope
+      gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0.2, audioContext.currentTime + 0.01);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.1);
+      
+      // Stop oscillator
+      oscillator.stop(audioContext.currentTime + 0.2);
+      
+      // Record the audio
+      const dest = audioContext.createMediaStreamDestination();
+      gainNode.connect(dest);
+      
+      const mediaRecorder = new MediaRecorder(dest.stream);
+      const chunks = [];
+      
+      mediaRecorder.ondataavailable = (e) => {
+        chunks.push(e.data);
+      };
+      
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(chunks, { type: 'audio/mpeg' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        document.body.appendChild(a);
+        a.style = 'display: none';
+        a.href = url;
+        a.download = 'timer-tick.mp3';
+        a.click();
+        window.URL.revokeObjectURL(url);
+      };
+      
+      mediaRecorder.start();
+      setTimeout(() => {
+        mediaRecorder.stop();
+      }, 200);
+    }
+    
+    // Button Click Sound - Soft click
+    function generateButtonClickSound() {
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      
+      // Create oscillator
+      const oscillator = audioContext.createOscillator();
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+      
+      // Create gain node
+      const gainNode = audioContext.createGain();
+      gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+      
+      // Connect nodes
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      // Start oscillator
+      oscillator.start(audioContext.currentTime);
+      
+      // Envelope
+      gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0.1, audioContext.currentTime + 0.005);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.05);
+      
+      // Stop oscillator
+      oscillator.stop(audioContext.currentTime + 0.1);
+      
+      // Record the audio
+      const dest = audioContext.createMediaStreamDestination();
+      gainNode.connect(dest);
+      
+      const mediaRecorder = new MediaRecorder(dest.stream);
+      const chunks = [];
+      
+      mediaRecorder.ondataavailable = (e) => {
+        chunks.push(e.data);
+      };
+      
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(chunks, { type: 'audio/mpeg' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        document.body.appendChild(a);
+        a.style = 'display: none';
+        a.href = url;
+        a.download = 'button-click.mp3';
+        a.click();
+        window.URL.revokeObjectURL(url);
+      };
+      
+      mediaRecorder.start();
+      setTimeout(() => {
+        mediaRecorder.stop();
+      }, 100);
+    }
+    
+    // Add event listeners to buttons
+    document.getElementById('generateTimerEnd').addEventListener('click', generateTimerEndSound);
+    document.getElementById('generateTimerTick').addEventListener('click', generateTimerTickSound);
+    document.getElementById('generateButtonClick').addEventListener('click', generateButtonClickSound);
+  </script>
+</body>
+</html>
